@@ -1,0 +1,23 @@
+<h2>Registrácia</h2>
+
+<!-- Formulár na vytvorenie nového účtu -->
+<form (ngSubmit)="register()">
+  <!-- meno používateľa, viazané na premennú username -->
+  <label>Meno:</label>
+  <input [(ngModel)]="username" name="username">
+
+  <!-- hlavné heslo -->
+  <label>Heslo:</label>
+  <input type="password" [(ngModel)]="password" name="password">
+
+  <!-- overenie hesla, musí sa rovnať hlavného heslu -->
+  <label>Over heslo:</label>
+  <input type="password" [(ngModel)]="password2" name="password2">
+
+  <button type="submit">Registrovať</button>
+</form>
+
+<!-- Chybová hláška z TS (napr. chýbajúce polia, heslá sa nezhodujú, používateľ existuje) -->
+<p style="color:red">{{ error }}</p>
+<!-- Správa o úspešnej registrácii -->
+<p style="color:green">{{ success }}</p>

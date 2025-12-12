@@ -1,0 +1,17 @@
+<h2>Prihlásenie</h2>
+
+<!-- Formulár na prihlásenie používateľa -->
+<form (ngSubmit)="login()">
+  <!-- [(ngModel)] prepája hodnotu inputu s premennou v TypeScripte -->
+  <label>Meno:</label>
+  <input [(ngModel)]="username" name="username" />
+
+  <label>Heslo:</label>
+  <input type="password" [(ngModel)]="password" name="password" />
+
+  <!-- Po kliknutí na tlačidlo sa spustí login() v komponente -->
+  <button type="submit">Prihlásiť</button>
+</form>
+
+<!-- Zobrazenie chybovej správy z TS triedy -->
+<p style="color:red">{{ error }}</p>
