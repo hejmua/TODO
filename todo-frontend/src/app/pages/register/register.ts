@@ -1,3 +1,4 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -8,7 +9,7 @@ import { AuthService } from '../../services/auth';
   selector: 'app-register',
   standalone: true,
   // FormsModule kvôli [(ngModel)] v HTML
-  imports: [FormsModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './register.html',
   styleUrl: './register.css',
 })

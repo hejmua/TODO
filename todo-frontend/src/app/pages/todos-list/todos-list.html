@@ -1,1 +1,61 @@
-<p>todos-list works!</p>
+<section class="card">
+  <div class="list-header">
+    <div class="section-title">
+      <span class="eyebrow">Úlohy</span>
+      <h2>Zoznam úloh</h2>
+      <p>Tu sa zobrazia všetky úlohy, ktoré si chcete vybaviť.</p>
+    </div>
+    <button type="button" class="add-btn" aria-label="Pridať úlohu" (click)="openModal()">+</button>
+  </div>
+
+  <div *ngIf="tasks.length; else empty">
+    <table class="tasks-table">
+      <thead>
+        <tr>
+          <th>Názov úlohy</th>
+          <th>Termín</th>
+          <th>Zostáva</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let task of tasks">
+          <td>{{ task.name }}</td>
+          <td>{{ task.deadline | date:'dd.MM.yyyy, HH:mm' }}</td>
+          <td>{{ remainingTime(task) }}</td>
+          <td><button type="button" class="ghost" (click)="removeTask(task.id)">Hotovo</button></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <ng-template #empty>
+    <p class="muted">Zatiaľ tu nič nie je, pridajte si prvú úlohu.</p>
+  </ng-template>
+</section>
+
+<div class="modal-backdrop" *ngIf="showModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="eyebrow">Nová úloha</span>
+        <h3>Pridať úlohu</h3>
+      </div>
+      <button type="button" class="ghost" (click)="closeModal()">×</button>
+    </div>
+    <form (ngSubmit)="addTask()">
+      <label>
+        Názov úlohy
+        <input [(ngModel)]="newTask.name" name="taskName" required placeholder="Napr. Nakŕmiť mačku" />
+      </label>
+      <label>
+        Deadline (dátum + čas)
+        <input type="datetime-local" [(ngModel)]="newTask.deadline" name="taskDeadline" required />
+      </label>
+      <div class="actions">
+        <button type="button" class="ghost" (click)="closeModal()">Zrušiť</button>
+        <button type="submit">Pridať</button>
+      </div>
+    </form>
+  </div>
+</div>

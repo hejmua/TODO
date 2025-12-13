@@ -1,17 +1,23 @@
-<h2>Prihlásenie</h2>
+<section class="card">
+  <div class="section-title">
+    <span class="eyebrow">Vitaj späť</span>
+    <h2>Prihlásenie</h2>
+    <p>Prihlás sa a pokračuj v práci na svojich úlohách.</p>
+  </div>
 
-<!-- Formulár na prihlásenie používateľa -->
-<form (ngSubmit)="login()">
-  <!-- [(ngModel)] prepája hodnotu inputu s premennou v TypeScripte -->
-  <label>Meno:</label>
-  <input [(ngModel)]="username" name="username" />
+  <form (ngSubmit)="login()">
+    <label>
+      Meno
+      <input [(ngModel)]="username" name="username" autocomplete="username" />
+    </label>
 
-  <label>Heslo:</label>
-  <input type="password" [(ngModel)]="password" name="password" />
+    <label>
+      Heslo
+      <input type="password" [(ngModel)]="password" name="password" autocomplete="current-password" />
+    </label>
 
-  <!-- Po kliknutí na tlačidlo sa spustí login() v komponente -->
-  <button type="submit">Prihlásiť</button>
-</form>
+    <button type="submit">Prihlásiť</button>
+  </form>
 
-<!-- Zobrazenie chybovej správy z TS triedy -->
-<p style="color:red">{{ error }}</p>
+  <p *ngIf="error" class="error-text">{{ error }}</p>
+</section>

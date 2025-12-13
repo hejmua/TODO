@@ -1,7 +1,16 @@
-<nav>
-  <a routerLink="/todos">Zoznam</a>
-  <a routerLink="/add">Pridať</a>
-  <a routerLink="/login">Login</a>
-  <a routerLink="/register">Register</a>
+<nav class="topbar">
+  <div class="nav-content">
+    <div class="brand">
+      <span class="dot"></span>
+      <div>
+        <strong>Simple TODO</strong>
+        <p class="muted">Spravujte úlohy na pár klikov</p>
+      </div>
+    </div>
+    <div class="links">
+      <a routerLink="/todos" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Zoznam</a>
+      <a routerLink="/login" routerLinkActive="active">Login</a>
+      <a routerLink="/register" routerLinkActive="active">Register</a>
+    </div>
+  </div>
 </nav>
-<hr>

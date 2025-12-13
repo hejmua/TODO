@@ -1,23 +1,29 @@
-<h2>Registrácia</h2>
+<section class="card">
+  <div class="section-title">
+    <span class="eyebrow">Nový účet</span>
+    <h2>Registrácia</h2>
+    <p>Vytvor si prístup a začni spravovať svoje TODO zoznamy.</p>
+  </div>
 
-<!-- Formulár na vytvorenie nového účtu -->
-<form (ngSubmit)="register()">
-  <!-- meno používateľa, viazané na premennú username -->
-  <label>Meno:</label>
-  <input [(ngModel)]="username" name="username">
+  <form (ngSubmit)="register()">
+    <label>
+      Meno
+      <input [(ngModel)]="username" name="username" autocomplete="username" />
+    </label>
 
-  <!-- hlavné heslo -->
-  <label>Heslo:</label>
-  <input type="password" [(ngModel)]="password" name="password">
+    <label>
+      Heslo
+      <input type="password" [(ngModel)]="password" name="password" autocomplete="new-password" />
+    </label>
 
-  <!-- overenie hesla, musí sa rovnať hlavného heslu -->
-  <label>Over heslo:</label>
-  <input type="password" [(ngModel)]="password2" name="password2">
+    <label>
+      Over heslo
+      <input type="password" [(ngModel)]="password2" name="password2" autocomplete="new-password" />
+    </label>
 
-  <button type="submit">Registrovať</button>
-</form>
+    <button type="submit">Registrovať</button>
+  </form>
 
-<!-- Chybová hláška z TS (napr. chýbajúce polia, heslá sa nezhodujú, používateľ existuje) -->
-<p style="color:red">{{ error }}</p>
-<!-- Správa o úspešnej registrácii -->
-<p style="color:green">{{ success }}</p>
+  <p *ngIf="error" class="error-text">{{ error }}</p>
+  <p *ngIf="success" class="success-text">{{ success }}</p>
+</section>
