@@ -26,7 +26,7 @@ export class Login {
   // do komponenty si vkladáme AuthService a Router (dependency injection)
   constructor(private auth: AuthService, private router: Router) {}
 
-  login() {
+  async login() {
     // pri každom pokuse o login vymažeme starú chybu
     this.error = '';
 
@@ -38,9 +38,9 @@ export class Login {
 
     try {
       // pokus o prihlásenie cez AuthService (kontrola proti "mock" databáze)
-      this.auth.login(this.username, this.password);
+      await this.auth.login(this.username, this.password);
       // po prihlásení môžeš napr. presmerovať na todo stránku
-      // this.router.navigate(['/todos']);
+      this.router.navigate(['/todos']);
     } catch (e: any) {
       // ak login zlyhá (zlé meno/heslo), zobrazíme správu z chyby
       this.error = e?.message || 'Chyba pri prihlásení';

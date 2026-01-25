@@ -1,11 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
+import { Subscription, filter } from 'rxjs';
+import { Todos } from '../../services/todos';
 
 type Task = {
   id: number;
   name: string;
   deadline: Date;
+};
+
+type ApiTask = {
+  id: number;
+  username: string;
+  taskName: string;
+  deadline: string;
 };
 
 @Component({
@@ -22,16 +32,43 @@ export class TodosList implements OnInit, OnDestroy {
     name: '',
     deadline: '',
   };
+  error = '';
+  adding = false;
+  loading = false;
   currentTime = Date.now();
   private ticker?: ReturnType<typeof setInterval>;
+  private routeEventsSub?: Subscription;
+  private routeDataSub?: Subscription;
+
+  constructor(
+    private todos: Todos,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit() {
+    this.routeDataSub = this.route.data.subscribe(data => {
+      const tasks = data['tasks'] as ApiTask[] | undefined;
+      if (tasks) {
+        this.tasks = tasks.map(task => this.mapApiTask(task));
+      }
+    });
+    void this.loadTasks();
+    this.routeEventsSub = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.router.url === '/todos') {
+          void this.loadTasks();
+        }
+      });
     this.ticker = setInterval(() => {
       this.currentTime = Date.now();
     }, 1000);
   }
 
   ngOnDestroy() {
+    this.routeEventsSub?.unsubscribe();
+    this.routeDataSub?.unsubscribe();
     if (this.ticker) {
       clearInterval(this.ticker);
     }
@@ -45,7 +82,11 @@ export class TodosList implements OnInit, OnDestroy {
     this.showModal = false;
   }
 
-  addTask() {
+  async addTask() {
+    if (this.adding) {
+      return;
+    }
+
     const name = this.newTask.name.trim();
     if (!name || !this.newTask.deadline) {
       return;
@@ -56,21 +97,39 @@ export class TodosList implements OnInit, OnDestroy {
       return;
     }
 
-    this.tasks = [
-      ...this.tasks,
-      {
-        id: Date.now(),
-        name,
-        deadline: parsed,
-      },
-    ];
+    const tempId = -Date.now();
+    const optimisticTask: Task = {
+      id: tempId,
+      name,
+      deadline: parsed,
+    };
 
-    this.newTask = { name: '', deadline: '' };
-    this.showModal = false;
+    try {
+      this.adding = true;
+      this.error = '';
+      this.tasks = [...this.tasks, optimisticTask];
+      this.newTask = { name: '', deadline: '' };
+      this.showModal = false;
+      const id = await this.todos.createTask(name, parsed.toISOString());
+      this.tasks = this.tasks.map(task => (task.id === tempId ? { ...task, id } : task));
+    } catch (error: any) {
+      this.tasks = this.tasks.filter(task => task.id !== tempId);
+      this.error = error?.message || 'Nepodarilo sa pridať úlohu';
+    } finally {
+      this.adding = false;
+    }
   }
 
-  removeTask(id: number) {
+  async removeTask(id: number) {
+    const previousTasks = this.tasks;
     this.tasks = this.tasks.filter(task => task.id !== id);
+    try {
+      this.error = '';
+      await this.todos.deleteTask(id);
+    } catch (error: any) {
+      this.tasks = previousTasks;
+      this.error = error?.message || 'Nepodarilo sa zmazať úlohu';
+    }
   }
 
   remainingTime(task: Task): string {
@@ -87,5 +146,28 @@ export class TodosList implements OnInit, OnDestroy {
     parts.push(`${minutes}m`);
 
     return diff >= 0 ? `Za ${parts.join(' ')}` : `Oneskorene ${parts.join(' ')}`;
+  }
+
+  private async loadTasks() {
+    try {
+      this.loading = true;
+      this.error = '';
+      const tasks = await this.todos.fetchTasks();
+      this.tasks = tasks.map(task => this.mapApiTask(task));
+    } catch (error: any) {
+      this.error = error?.message || 'Nepodarilo sa načítať úlohy';
+      this.tasks = [];
+    } finally {
+      this.loading = false;
+    }
+  }
+
+  private mapApiTask(task: ApiTask): Task {
+    const parsed = new Date(task.deadline);
+    return {
+      id: task.id,
+      name: task.taskName,
+      deadline: isNaN(parsed.getTime()) ? new Date() : parsed,
+    };
   }
 }

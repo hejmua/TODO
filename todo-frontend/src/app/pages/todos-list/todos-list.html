@@ -8,6 +8,9 @@
     <button type="button" class="add-btn" aria-label="Pridať úlohu" (click)="openModal()">+</button>
   </div>
 
+  <p *ngIf="error" class="error-text">{{ error }}</p>
+  <p *ngIf="loading && !tasks.length" class="muted">Načítavam úlohy...</p>
+
   <div *ngIf="tasks.length; else empty">
     <table class="tasks-table">
       <thead>
@@ -54,7 +57,7 @@
       </label>
       <div class="actions">
         <button type="button" class="ghost" (click)="closeModal()">Zrušiť</button>
-        <button type="submit">Pridať</button>
+        <button type="submit" [disabled]="adding">Pridať</button>
       </div>
     </form>
   </div>

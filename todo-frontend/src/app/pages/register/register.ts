@@ -26,7 +26,7 @@ export class Register {
   // AuthService použijeme na uloženie nového používateľa (do mock databázy)
   constructor(private auth: AuthService, private router: Router) {}
 
-  register() {
+  async register() {
     // pri každom pokuse resetujeme správy
     this.error = '';
     this.success = '';
@@ -45,14 +45,10 @@ export class Register {
 
     try {
       // pokus o registráciu nového používateľa
-      this.auth.register(this.username, this.password);
-      this.success = 'Registrácia prebehla úspešne. Môžeš sa prihlásiť.';
-      // vyčistenie formulára
-      this.username = '';
-      this.password = '';
-      this.password2 = '';
-      // voliteľne redirect na login stránku
-      // this.router.navigate(['/login']);
+      await this.auth.register(this.username, this.password);
+      await this.auth.login(this.username, this.password);
+      this.success = 'Registrácia prebehla úspešne.';
+      this.router.navigate(['/todos']);
     } catch (e: any) {
       // ak používateľ už existuje alebo iná chyba
       this.error = e?.message || 'Chyba pri registrácii';

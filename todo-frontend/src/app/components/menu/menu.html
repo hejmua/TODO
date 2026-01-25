@@ -9,8 +9,14 @@
     </div>
     <div class="links">
       <a routerLink="/todos" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Zoznam</a>
-      <a routerLink="/login" routerLinkActive="active">Login</a>
-      <a routerLink="/register" routerLinkActive="active">Register</a>
+      <ng-container *ngIf="isLoggedIn(); else loggedOut">
+        <span class="user">{{ loggedUser() }}</span>
+        <button type="button" class="logout" (click)="logout()">Log out</button>
+      </ng-container>
+      <ng-template #loggedOut>
+        <a routerLink="/login" routerLinkActive="active">Login</a>
+        <a routerLink="/register" routerLinkActive="active">Register</a>
+      </ng-template>
     </div>
   </div>
 </nav>
