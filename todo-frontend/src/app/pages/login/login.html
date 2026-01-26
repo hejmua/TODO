@@ -1,3 +1,4 @@
+<!-- Login card and form -->
 <section class="card">
   <div class="section-title">
     <span class="eyebrow">Vitaj späť</span>
@@ -5,6 +6,7 @@
     <p>Prihlás sa a pokračuj v práci na svojich úlohách.</p>
   </div>
 
+  <!-- Credentials form -->
   <form (ngSubmit)="login()">
     <label>
       Meno
@@ -19,5 +21,6 @@
     <button type="submit">Prihlásiť</button>
   </form>
 
+  <!-- Inline error feedback -->
   <p *ngIf="error" class="error-text">{{ error }}</p>
 </section>

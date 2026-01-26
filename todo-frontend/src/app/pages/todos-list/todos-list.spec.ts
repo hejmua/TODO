@@ -3,11 +3,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TodosList } from './todos-list';
 
+// Basic creation test for the todos list component.
 describe('TodosList', () => {
   let component: TodosList;
   let fixture: ComponentFixture<TodosList>;
 
   beforeEach(async () => {
+    // Provide HttpClientTestingModule for injected services.
     await TestBed.configureTestingModule({
       imports: [TodosList, HttpClientTestingModule]
     })

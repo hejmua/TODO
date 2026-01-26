@@ -1,3 +1,4 @@
+<!-- Task list card -->
 <section class="card">
   <div class="list-header">
     <div class="section-title">
@@ -5,12 +6,15 @@
       <h2>Zoznam úloh</h2>
       <p>Tu sa zobrazia všetky úlohy, ktoré si chcete vybaviť.</p>
     </div>
+    <!-- Add new task modal trigger -->
     <button type="button" class="add-btn" aria-label="Pridať úlohu" (click)="openModal()">+</button>
   </div>
 
+  <!-- Status messages -->
   <p *ngIf="error" class="error-text">{{ error }}</p>
   <p *ngIf="loading && !tasks.length" class="muted">Načítavam úlohy...</p>
 
+  <!-- Task table -->
   <div *ngIf="tasks.length; else empty">
     <table class="tasks-table">
       <thead>
@@ -32,11 +36,13 @@
     </table>
   </div>
 
+  <!-- Empty state -->
   <ng-template #empty>
     <p class="muted">Zatiaľ tu nič nie je, pridajte si prvú úlohu.</p>
   </ng-template>
 </section>
 
+<!-- Modal for creating a new task -->
 <div class="modal-backdrop" *ngIf="showModal">
   <div class="modal">
     <div class="modal-header">
@@ -46,6 +52,7 @@
       </div>
       <button type="button" class="ghost" (click)="closeModal()">×</button>
     </div>
+    <!-- New task form -->
     <form (ngSubmit)="addTask()">
       <label>
         Názov úlohy

@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from './auth';
 
+// API payloads for task endpoints.
 type TasksResponse = {
   ok: boolean;
   tasks: ApiTask[];
@@ -13,6 +14,7 @@ type CreateTaskResponse = {
   id: number;
 };
 
+// Server task shape as returned by the API.
 type ApiTask = {
   id: number;
   username: string;
@@ -24,6 +26,7 @@ type TodosErrorResponse = {
   error?: string;
 };
 
+// Tasks API base for local development.
 const TODOS_BASE_URL = 'http://localhost:4000';
 
 @Injectable({
@@ -32,6 +35,7 @@ const TODOS_BASE_URL = 'http://localhost:4000';
 export class Todos {
   constructor(private http: HttpClient, private auth: AuthService) {}
 
+  // Load tasks for the current user.
   async fetchTasks(): Promise<ApiTask[]> {
     const username = this.requireUser();
     try {
@@ -72,6 +76,7 @@ export class Todos {
     }
   }
 
+  // Ensure API calls have a logged-in user context.
   private requireUser(): string {
     const username = this.auth.getLoggedUser();
     if (!username) {
@@ -80,6 +85,7 @@ export class Todos {
     return username;
   }
 
+  // Normalize HTTP errors into simple Error instances for UI display.
   private toTodosError(error: unknown): Error {
     if (error instanceof HttpErrorResponse) {
       const apiError = error.error as TodosErrorResponse | undefined;

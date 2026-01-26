@@ -5,7 +5,7 @@ const path = require("path");
 const app = express();
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   if (req.method === "OPTIONS") {
     return res.sendStatus(204);
@@ -22,8 +22,22 @@ db.serialize(() => {
     "CREATE TABLE IF NOT EXISTS users (username TEXT PRIMARY KEY, password TEXT NOT NULL)"
   );
   db.run(
-    "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, task_name TEXT NOT NULL, deadline TEXT NOT NULL, FOREIGN KEY(username) REFERENCES users(username))"
+    "CREATE TABLE IF NOT EXISTS tasks (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, task_name TEXT NOT NULL, task_description TEXT NOT NULL DEFAULT '', deadline TEXT NOT NULL, FOREIGN KEY(username) REFERENCES users(username))"
   );
+  db.all("PRAGMA table_info(tasks)", (err, columns) => {
+    if (err) {
+      console.error("PRAGMA table_info(tasks) failed", err);
+      return;
+    }
+    const hasDescription = columns.some(
+      (column) => column.name === "task_description"
+    );
+    if (!hasDescription) {
+      db.run(
+        "ALTER TABLE tasks ADD COLUMN task_description TEXT NOT NULL DEFAULT ''"
+      );
+    }
+  });
 });
 
 app.post("/register", (req, res) => {
@@ -85,7 +99,7 @@ app.post("/login", (req, res) => {
 
 app.post("/tasks", (req, res) => {
   console.log("POST /tasks", req.body);
-  const { username, taskName, deadline } = req.body || {};
+  const { username, taskName, taskDescription, deadline } = req.body || {};
   if (!username || !taskName || !deadline) {
     return res
       .status(400)
@@ -93,8 +107,8 @@ app.post("/tasks", (req, res) => {
   }
 
   db.run(
-    "INSERT INTO tasks (username, task_name, deadline) VALUES (?, ?, ?)",
-    [username, taskName, deadline],
+    "INSERT INTO tasks (username, task_name, task_description, deadline) VALUES (?, ?, ?, ?)",
+    [username, taskName, taskDescription || "", deadline],
     function (err) {
       if (err) {
         return res.status(500).json({ error: "database error" });
@@ -112,7 +126,7 @@ app.get("/tasks", (req, res) => {
   }
 
   db.all(
-    "SELECT id, username, task_name AS taskName, deadline FROM tasks WHERE username = ? ORDER BY id DESC",
+    "SELECT id, username, task_name AS taskName, task_description AS taskDescription, deadline FROM tasks WHERE username = ? ORDER BY id DESC",
     [nickname],
     (err, rows) => {
       if (err) {
@@ -131,6 +145,48 @@ app.delete("/tasks/:id", (req, res) => {
   }
 
   db.run("DELETE FROM tasks WHERE id = ?", [taskId], function (err) {
+    if (err) {
+      return res.status(500).json({ error: "database error" });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ error: "task not found" });
+    }
+    return res.json({ ok: true });
+  });
+});
+
+app.put("/tasks/:id", (req, res) => {
+  const taskId = Number(req.params.id);
+  console.log("PUT /tasks/:id", { id: req.params.id, body: req.body });
+  if (!Number.isInteger(taskId) || taskId <= 0) {
+    return res.status(400).json({ error: "valid task id required" });
+  }
+
+  const { taskName, taskDescription, deadline } = req.body || {};
+  const updates = [];
+  const values = [];
+
+  if (typeof taskName === "string") {
+    updates.push("task_name = ?");
+    values.push(taskName);
+  }
+  if (typeof taskDescription === "string") {
+    updates.push("task_description = ?");
+    values.push(taskDescription);
+  }
+  if (typeof deadline === "string") {
+    updates.push("deadline = ?");
+    values.push(deadline);
+  }
+
+  if (updates.length === 0) {
+    return res
+      .status(400)
+      .json({ error: "taskName, taskDescription or deadline required" });
+  }
+
+  values.push(taskId);
+  db.run(`UPDATE tasks SET ${updates.join(", ")} WHERE id = ?`, values, function (err) {
     if (err) {
       return res.status(500).json({ error: "database error" });
     }

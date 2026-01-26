@@ -3,11 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth';
 
-// Jednoduché horné menu s odkazmi na rôzne stránky
 @Component({
   selector: 'app-menu',
   standalone: true,
-  // RouterModule je potrebný kvôli direktíve routerLink v HTML
   imports: [CommonModule, RouterModule],
   templateUrl: './menu.html',
   styleUrl: './menu.css',

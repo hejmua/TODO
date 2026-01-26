@@ -11,6 +11,7 @@ type Task = {
   deadline: Date;
 };
 
+// API task shape used by the resolver.
 type ApiTask = {
   id: number;
   username: string;
@@ -25,6 +26,7 @@ type ApiTask = {
   templateUrl: './todos-list.html',
   styleUrl: './todos-list.css',
 })
+// Task list page with modal creation and optimistic UI updates.
 export class TodosList implements OnInit, OnDestroy {
   tasks: Task[] = [];
   showModal = false;
@@ -47,6 +49,7 @@ export class TodosList implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Load any tasks resolved by the route before initial render.
     this.routeDataSub = this.route.data.subscribe(data => {
       const tasks = data['tasks'] as ApiTask[] | undefined;
       if (tasks) {
@@ -54,6 +57,7 @@ export class TodosList implements OnInit, OnDestroy {
       }
     });
     void this.loadTasks();
+    // Reload tasks after navigating back to /todos.
     this.routeEventsSub = this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
       .subscribe(() => {
@@ -61,6 +65,7 @@ export class TodosList implements OnInit, OnDestroy {
           void this.loadTasks();
         }
       });
+    // Tick once per second for remaining time display.
     this.ticker = setInterval(() => {
       this.currentTime = Date.now();
     }, 1000);
@@ -97,6 +102,7 @@ export class TodosList implements OnInit, OnDestroy {
       return;
     }
 
+    // Optimistically render a temporary task while the API call runs.
     const tempId = -Date.now();
     const optimisticTask: Task = {
       id: tempId,

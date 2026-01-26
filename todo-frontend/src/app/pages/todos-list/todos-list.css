@@ -1,3 +1,4 @@
+/* Layout tweaks for the tasks list page. */
 .list-header {
   display: flex;
   align-items: flex-start;
@@ -51,6 +52,7 @@
   background: rgba(37, 99, 235, 0.08);
 }
 
+/* Modal overlay and panel. */
 .modal-backdrop {
   position: fixed;
   inset: 0;

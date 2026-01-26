@@ -17,6 +17,15 @@ const requireAuth = () => {
   return auth.isLoggedIn() ? true : router.createUrlTree(['/login']);
 };
 
+const redirectUnknownRoute = () => {
+  const auth = inject(AuthService);
+  const router = inject(Router);
+
+  return auth.isLoggedIn()
+    ? router.createUrlTree(['/todos'])
+    : router.createUrlTree(['/login']);
+};
+
 const resolveTasks = async () => {
   const todos = inject(Todos);
   try {
@@ -26,20 +35,22 @@ const resolveTasks = async () => {
   }
 };
 
-// Zoznam všetkých ciest (URL) v aplikácii – standalone štýl (bez AppRoutingModule)
 export const routes: Routes = [
-  // Pri prázdnej URL ("/") presmerujeme na login
   { path: '', pathMatch: 'full', redirectTo: 'login' },
 
-  // Auth stránky
   { path: 'login', canActivate: [redirectIfLoggedIn], loadComponent: () => import('./pages/login/login').then(m => m.Login) },
   { path: 'register', canActivate: [redirectIfLoggedIn], loadComponent: () => import('./pages/register/register').then(m => m.Register) },
 
-  // Todos stránky (zoznam úloh a pridanie úlohy)
   {
     path: 'todos',
     canActivate: [requireAuth],
     resolve: { tasks: resolveTasks },
     loadComponent: () => import('./pages/todos-list/todos-list').then(m => m.TodosList)
+  },
+
+  {
+    path: '**',
+    canActivate: [redirectUnknownRoute],
+    loadComponent: () => import('./pages/login/login').then(m => m.Login)
   }
 ];

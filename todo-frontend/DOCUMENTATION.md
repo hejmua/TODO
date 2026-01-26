@@ -107,7 +107,6 @@ export const routes: Routes = [
   - This allows reloading the same URL and re-triggering the resolver.
 
 ## 5) Authentication (local storage)
-
 All auth logic is in `src/app/services/auth.ts`.
 
 ### HTTP endpoints used
