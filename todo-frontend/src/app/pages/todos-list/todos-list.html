@@ -22,7 +22,7 @@
           <th>Názov úlohy</th>
           <th>Termín</th>
           <th>Zostáva</th>
-          <th></th>
+          <th>Akcie</th>
         </tr>
       </thead>
       <tbody>
@@ -30,7 +30,12 @@
           <td>{{ task.name }}</td>
           <td>{{ task.deadline | date:'dd.MM.yyyy, HH:mm' }}</td>
           <td>{{ remainingTime(task) }}</td>
-          <td><button type="button" class="ghost" (click)="removeTask(task.id)">Hotovo</button></td>
+          <td>
+            <div class="row-actions">
+              <button type="button" class="ghost" (click)="openEditModal(task)">Upraviť</button>
+              <button type="button" class="ghost" (click)="removeTask(task.id)">Hotovo</button>
+            </div>
+          </td>
         </tr>
       </tbody>
     </table>
@@ -65,6 +70,33 @@
       <div class="actions">
         <button type="button" class="ghost" (click)="closeModal()">Zrušiť</button>
         <button type="submit" [disabled]="adding">Pridať</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Modal for updating an existing task -->
+<div class="modal-backdrop" *ngIf="showEditModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <span class="eyebrow">Úprava úlohy</span>
+        <h3>Upraviť úlohu</h3>
+      </div>
+      <button type="button" class="ghost" (click)="closeEditModal()">×</button>
+    </div>
+    <form (ngSubmit)="saveTaskEdit()">
+      <label>
+        Názov úlohy
+        <input [(ngModel)]="editTask.name" name="editTaskName" required />
+      </label>
+      <label>
+        Deadline (dátum + čas)
+        <input type="datetime-local" [(ngModel)]="editTask.deadline" name="editTaskDeadline" required />
+      </label>
+      <div class="actions">
+        <button type="button" class="ghost" (click)="closeEditModal()">Zrušiť</button>
+        <button type="submit" [disabled]="savingEdit">Uložiť</button>
       </div>
     </form>
   </div>

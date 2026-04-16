@@ -30,12 +30,19 @@ type ApiTask = {
 export class TodosList implements OnInit, OnDestroy {
   tasks: Task[] = [];
   showModal = false;
+  showEditModal = false;
   newTask = {
+    name: '',
+    deadline: '',
+  };
+  editTask = {
+    id: 0,
     name: '',
     deadline: '',
   };
   error = '';
   adding = false;
+  savingEdit = false;
   loading = false;
   currentTime = Date.now();
   private ticker?: ReturnType<typeof setInterval>;
@@ -87,6 +94,20 @@ export class TodosList implements OnInit, OnDestroy {
     this.showModal = false;
   }
 
+  openEditModal(task: Task) {
+    this.showEditModal = true;
+    this.editTask = {
+      id: task.id,
+      name: task.name,
+      deadline: this.toDateTimeLocal(task.deadline),
+    };
+  }
+
+  closeEditModal() {
+    this.showEditModal = false;
+    this.editTask = { id: 0, name: '', deadline: '' };
+  }
+
   async addTask() {
     if (this.adding) {
       return;
@@ -123,6 +144,40 @@ export class TodosList implements OnInit, OnDestroy {
       this.error = error?.message || 'Nepodarilo sa pridať úlohu';
     } finally {
       this.adding = false;
+    }
+  }
+
+  async saveTaskEdit() {
+    if (this.savingEdit) {
+      return;
+    }
+
+    const id = this.editTask.id;
+    const name = this.editTask.name.trim();
+    if (!id || !name || !this.editTask.deadline) {
+      return;
+    }
+
+    const parsed = new Date(this.editTask.deadline);
+    if (isNaN(parsed.getTime())) {
+      return;
+    }
+
+    const previousTasks = this.tasks;
+    this.tasks = this.tasks.map(task =>
+      task.id === id ? { ...task, name, deadline: parsed } : task
+    );
+
+    try {
+      this.savingEdit = true;
+      this.error = '';
+      await this.todos.updateTask(id, name, parsed.toISOString());
+      this.closeEditModal();
+    } catch (error: any) {
+      this.tasks = previousTasks;
+      this.error = error?.message || 'Nepodarilo sa upraviť úlohu';
+    } finally {
+      this.savingEdit = false;
     }
   }
 
@@ -175,5 +230,10 @@ export class TodosList implements OnInit, OnDestroy {
       name: task.taskName,
       deadline: isNaN(parsed.getTime()) ? new Date() : parsed,
     };
+  }
+
+  private toDateTimeLocal(date: Date): string {
+    const pad = (value: number) => value.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
   }
 }

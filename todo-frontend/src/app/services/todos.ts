@@ -14,6 +14,10 @@ type CreateTaskResponse = {
   id: number;
 };
 
+type UpdateTaskResponse = {
+  ok: boolean;
+};
+
 // Server task shape as returned by the API.
 type ApiTask = {
   id: number;
@@ -70,6 +74,21 @@ export class Todos {
     try {
       await firstValueFrom(
         this.http.delete<{ ok: boolean }>(`${TODOS_BASE_URL}/tasks/${id}`)
+      );
+    } catch (error) {
+      throw this.toTodosError(error);
+    }
+  }
+
+  async updateTask(id: number, taskName: string, deadline: string) {
+    const username = this.requireUser();
+    try {
+      await firstValueFrom(
+        this.http.put<UpdateTaskResponse>(`${TODOS_BASE_URL}/tasks/${id}`, {
+          username,
+          taskName,
+          deadline,
+        })
       );
     } catch (error) {
       throw this.toTodosError(error);

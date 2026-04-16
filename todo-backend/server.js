@@ -162,21 +162,26 @@ app.put("/tasks/:id", (req, res) => {
     return res.status(400).json({ error: "valid task id required" });
   }
 
-  const { taskName, taskDescription, deadline } = req.body || {};
+  const { username, taskName, taskDescription, deadline } = req.body || {};
+  if (typeof username !== "string" || !username.trim()) {
+    return res.status(400).json({ error: "username required" });
+  }
+
+  const normalizedUsername = username.trim();
   const updates = [];
   const values = [];
 
-  if (typeof taskName === "string") {
+  if (typeof taskName === "string" && taskName.trim()) {
     updates.push("task_name = ?");
-    values.push(taskName);
+    values.push(taskName.trim());
   }
   if (typeof taskDescription === "string") {
     updates.push("task_description = ?");
     values.push(taskDescription);
   }
-  if (typeof deadline === "string") {
+  if (typeof deadline === "string" && deadline.trim()) {
     updates.push("deadline = ?");
-    values.push(deadline);
+    values.push(deadline.trim());
   }
 
   if (updates.length === 0) {
@@ -185,16 +190,20 @@ app.put("/tasks/:id", (req, res) => {
       .json({ error: "taskName, taskDescription or deadline required" });
   }
 
-  values.push(taskId);
-  db.run(`UPDATE tasks SET ${updates.join(", ")} WHERE id = ?`, values, function (err) {
-    if (err) {
-      return res.status(500).json({ error: "database error" });
+  values.push(taskId, normalizedUsername);
+  db.run(
+    `UPDATE tasks SET ${updates.join(", ")} WHERE id = ? AND username = ?`,
+    values,
+    function (err) {
+      if (err) {
+        return res.status(500).json({ error: "database error" });
+      }
+      if (this.changes === 0) {
+        return res.status(404).json({ error: "task not found for user" });
+      }
+      return res.json({ ok: true });
     }
-    if (this.changes === 0) {
-      return res.status(404).json({ error: "task not found" });
-    }
-    return res.json({ ok: true });
-  });
+  );
 });
 
 const PORT = 4000;
